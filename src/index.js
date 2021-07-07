@@ -4,13 +4,6 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-if (process.env.NODE_ENV === "staging"{
-      app.use(express.static("build"));
-      app.get("*", (req, res) => {
-        res.sendFile(path.resolve(__dirname,  "build", "index.html"));
-      });
-    }
-
 
 ReactDOM.render(
   <React.StrictMode>
