@@ -37,6 +37,38 @@
   margin: auto 10px;
 }
 
+.pane {
+  margin: 0 auto;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  align-items: flex-start;
+  justify-items: flex-start;
+}
+
+.quote-info {
+  margin: 0 auto;
+  width: 80%;
+  display: flex;
+  flex-direction: row;
+  overflow: auto;
+  background-color: white;
+  border: black solid 2px;
+  height: 50%;
+  text-align: left;
+  align-items: flex-start;
+  justify-items: flex-start;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.quote-info span {
+  margin: 4px;
+  color: black;
+  font-size: 13px;
+}
+
 /* Make it move */
 @keyframes marquee {
   0%   { transform: translate(0, 0); }
