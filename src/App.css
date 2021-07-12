@@ -24,6 +24,21 @@
   color: white;
 }
 
+.loading {
+  height: 100vh;
+  width: 100vw;
+  opacity: 0.6;
+  background-color: black;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+}
+
 .marquee {
   margin: 0 auto;
   white-space: nowrap;

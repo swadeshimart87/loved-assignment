@@ -7,14 +7,14 @@ function LineChart(props) {
         () => [
             {
                 label: 'Price/Time',
-                data: props.data.map((value) => [i++, value.p])
+                data: props.data.map((value) => [new Date(value.t).getTime(), value.p])
             }
         ], [props.data]
     );
 
     const axes = React.useMemo(
         () => [
-          { primary: true, type: 'linear', position: 'bottom' },
+          { primary: true, type: 'time', position: 'bottom' },
           { type: 'linear', position: 'left' }
         ],
         []
@@ -22,7 +22,8 @@ function LineChart(props) {
 
     if(props.data && props.data.length) {
         return (
-            <div style={{width: '400px', height: '300px'}}>
+            <div style={{width: '45%', height: '300px', margin: '16px'}}>
+              {props.children}
               <Chart data={data} axes={axes} />
             </div>
           );
