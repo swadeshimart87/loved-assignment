@@ -11,7 +11,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.symbols = ['GOOG','FB','BLKB','JKHY','TXN', 'APPL'];
-    this.state = { quote: {}, ws: null, symbol: '', searchResults: [], companyProfile: {}, chartData: [] };
+    this.state = { quote: {}, ws: null, symbol: '', searchResults: [], companyProfile: {}, chartData: [], historicalData: [], intraDayData: [] };
   }
 
   connect = () => {
@@ -93,22 +93,55 @@ class App extends React.Component {
         }
       })
       .then(data => this.setState({companyProfile: data}));
-    fetch('https://finnhub.io/api/v1/quote?token=sandbox_c3k6e62ad3i8d96rtedg&symbol=' + value)
+    fetch('https://finnhub.io/api/v1/quote?token=c3k6e62ad3i8d96rted0&symbol=' + value)
       .then(response => {
         if(response.ok) {
           return response.json();
         }
       })
       .then(data => this.setState({quote: data}));
+      fetch('https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&apikey=SLA6RKOKBU1CLU3G&symbol=' + value)
+        .then(response => {
+          if(response.ok) {
+            return response.json();
+          }
+        })
+        .then(data => {
+          const historicalData = data && Object.keys(data['Time Series (Daily)'])
+                                  .map(key => {return (
+                                      {'p': data['Time Series (Daily)'][key]['5. adjusted close'], 't': key})});
+          this.setState({historicalData: historicalData})});
+        fetch('https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&interval=5min&adjusted=false&apikey=SLA6RKOKBU1CLU3G&outputsize=full&symbol=' + value)
+        .then(response => {
+          if(response.ok) {
+            return response.json();
+          }
+        })
+        .then(data => {
+          const intraDayData = data && Object.keys(data['Time Series (5min)'])
+                                .map(key => {return (
+                                    {'p': data['Time Series (5min)'][key]['4. close'], 't': key})});
+          this.setState({intraDayData: intraDayData});
+        });
     this.state.ws.send(JSON.stringify({type: 'susbscribe', symbol: value}));
     this.setState({symbol: value});
+  }
+
+  renderCharts = () => {
+    
+      if(this.state.historicalData.length || this.state.intraDayData.length) {
+          return (<div className="quote-info">
+          {this.state.historicalData.length ? <LineChart data={this.state.historicalData}></LineChart> : null}
+          {this.state.intraDayData.length ? <LineChart data={this.state.intraDayData}></LineChart> : null}
+        </div>
+        );
+      }
   }
 
   renderQuoteInfo = () => {
     if((this.state.companyProfile && this.state.companyProfile.name) || (this.state.quote && this.state.quote.p)) {
       return (
         <div className="quote-info">
-          <LineChart data={this.state.chartData}></LineChart>
           <div className="pane">
             <img src={this.state.companyProfile.logo} alt={this.state.companyProfile.name}/>
             <span>Company Name: {this.state.companyProfile.name}</span>
@@ -130,7 +163,7 @@ class App extends React.Component {
   render() {
       return (
         <div className="App">
-          <header className="App-header">            
+          <header className="App-header">
             <Autocomplete
               getItemValue={(item) => item.symbol}
               items={this.state.searchResults}
@@ -143,6 +176,7 @@ class App extends React.Component {
               onChange={(e) => this.fetchSymbol(e.target.value)}
               onSelect={(val) => this.selectSymbol(val)}
             />
+            {this.renderCharts()}
             {this.renderQuoteInfo()}
           </header>
         </div>

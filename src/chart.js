@@ -2,11 +2,12 @@ import React from 'react'
 import { Chart } from 'react-charts'
 
 function LineChart(props) {
+  let i = 0;
     const data = React.useMemo(
         () => [
             {
                 label: 'Price/Time',
-                data: props.data.map((value) => [value.p, `${new Date(value.t).getHours()}:${new Date(value.t).getMinutes()}`])
+                data: props.data.map((value) => [i++, value.p])
             }
         ], [props.data]
     );
