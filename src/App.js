@@ -12,7 +12,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.symbols = ['GOOG','FB','BLKB','JKHY','TXN', 'APPL'];
-    this.state = { quote: {}, ws: null, symbol: '', searchResults: [], companyProfile: {}, chartData: [], historicalData: [], intraDayData: [], isLoading: true };
+    this.state = { quote: {}, ws: null, symbol: '', searchResults: [], companyProfile: {}, chartData: [], historicalData: {}, intraDayData: {}, isLoading: true };
   }
 
   connect = () => {
@@ -171,14 +171,14 @@ class App extends React.Component {
     }
   }
 
-  renderCharts = () => {    
-      if(this.state.historicalData.length || this.state.intraDayData.length) {
+  renderCharts = () => {  
+    if(this.state.historicalData.length || this.state.intraDayData.length) {
           return (<div className="quote-info" style={{height: '400px'}}>
           {this.state.historicalData.length ? <LineChart data={this.state.historicalData}><div style={{color: 'black', textAlign: 'center', fontSize: '14px'}}>Last 3 months price graph(daily close)</div></LineChart> : null}
           {this.state.intraDayData.length ? <LineChart data={this.state.intraDayData}><div style={{color: 'black', textAlign: 'center', fontSize: '14px'}}>Last 8 hours price graph(5 min interval)</div></LineChart> : null}
         </div>
         );
-      } else {
+      } else if(this.state.historicalData.length === 0 && this.state.intraDayData.length === 0) {
         return (
           <div className="quote-info" style={{height: '100px', color: 'black', 'fontSize': '14px'}}>
             Error while fetch graph information, please try with another symbol
