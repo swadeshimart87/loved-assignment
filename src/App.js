@@ -150,10 +150,10 @@ class App extends React.Component {
           <div className="pane">
             <span>Exchange Name: {this.state.companyProfile.exchange}</span>
             <span>Currency: {this.state.companyProfile.currency}</span>
-            <span>Closing Price: {this.state.quote.c}</span>
-            <span>High Price: {this.state.quote.h}</span>
-            <span>Low Price: {this.state.quote.l}</span>
-            <span>Open Price: {this.state.quote.o}</span>
+            <span>Closing Price: {this.state.quote ? this.state.quote.c : '--'}</span>
+            <span>High Price: {this.state.quote ? this.state.quote.h : '--'}</span>
+            <span>Low Price: {this.state.quote ? this.state.quote.l : '--'}</span>
+            <span>Open Price: {this.state.quote ? this.state.quote.o : '--'}</span>
           </div>
         </div>
       );
@@ -168,7 +168,7 @@ class App extends React.Component {
               getItemValue={(item) => item.symbol}
               items={this.state.searchResults}
               renderItem={(item, isHighlighted) =>
-                <div style={{ background: isHighlighted ? 'lightgray' : 'white', textAlign: 'left', color: 'black', fontSize: '13px', cursor: 'pointer' }}>
+                <div style={{ background: isHighlighted ? 'lightgray' : 'white', textAlign: 'left', color: 'black', fontSize: '13px', cursor: 'pointer', zIndex:1001 }}>
                   {[item.description, item.displaySymbol, item.symbol].join('  ')}
                 </div>
               }
