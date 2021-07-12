@@ -57,7 +57,7 @@ class App extends React.Component {
 
   fetchSymbol = (value) => {
     this.setState({symbol: value});
-      if(value.length >= 3 && value !== this.prevValue) {
+      if(value !== this.prevValue) {
         this.prevValue = value;
         const currentIteration = this.acceptIteration + 1;
         this.acceptIteration = this.acceptIteration + 1;
