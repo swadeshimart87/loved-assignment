@@ -78,6 +78,16 @@
   padding: 16px;
 }
 
+@media only screen and (max-width: 1024px) {
+  .quote-info {
+    flex-direction: column;
+  }
+
+  .quote-info-chart {
+    height: 700px !important;
+  }
+}
+
 .quote-info span {
   margin: 4px;
   color: black;

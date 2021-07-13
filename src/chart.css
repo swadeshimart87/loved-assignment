@@ -1,0 +1,12 @@
+.chart {
+    height: '300px'; 
+    margin: '16px';
+    display: block;
+}
+
+@media only screen and (max-width: 1024px) {
+    .chart {
+        width: 100% !important;
+        margin: 16px 0;
+    }
+}

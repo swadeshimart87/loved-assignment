@@ -1,5 +1,6 @@
 import React from 'react'
 import { Chart } from 'react-charts'
+import './chart.css';
 
 function LineChart(props) {
   let i = 0;
@@ -22,7 +23,7 @@ function LineChart(props) {
 
     if(props.data && props.data.length) {
         return (
-            <div style={{width: '45%', height: '300px', margin: '16px'}}>
+            <div className="chart" style={{height: '300px', width: '50%'}}>
               {props.children}
               <Chart data={data} axes={axes} />
             </div>
