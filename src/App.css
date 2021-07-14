@@ -65,6 +65,7 @@
 .quote-info {
   margin: 0 auto;
   width: 80%;
+  overflow-x: auto;
   display: flex;
   flex-direction: row;
   overflow: auto;

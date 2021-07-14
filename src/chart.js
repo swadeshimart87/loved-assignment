@@ -23,7 +23,7 @@ function LineChart(props) {
 
     if(props.data && props.data.length) {
         return (
-            <div className="chart" style={{height: '300px', width: '50%'}}>
+            <div className="chart" style={{height: '300px', width: '100%'}}>
               {props.children}
               <Chart data={data} axes={axes} />
             </div>

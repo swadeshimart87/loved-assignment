@@ -12,11 +12,11 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.symbols = ['GOOG','FB','BLKB','JKHY','TXN', 'APPL'];
-    this.state = { quote: {}, ws: null, symbol: '', searchResults: [], companyProfile: {}, chartData: [], historicalData: {}, intraDayData: {}, isLoading: true };
+    this.state = { quote: {}, ws: null, symbol: '', searchResults: [], companyProfile: {}, chartData: [], historicalData: {}, intraDayData: {}, isLoading: true, fiveMinuteURL: '' , oldSymbol: ''};
   }
 
   connect = () => {
-    var ws = new WebSocket("wss://ws.finnhub.io?token=c3k6e62ad3i8d96rted0");
+    var ws = new WebSocket("wss://ws.finnhub.io?token=c3nh42iad3iabnjj9lkg");
 
     ws.onopen = () => {
         console.log("connected websocket main component");
@@ -24,15 +24,15 @@ class App extends React.Component {
     };
 
     ws.onmessage = evt => {
-      const message = JSON.parse(evt.data)
+      const message = JSON.parse(evt.data);
+      console.log(message);
       if(message.type === 'trade') {
-        const data = [...this.state.chartData, message.data.filter(trade => trade.s.toUpperCase() === this.state.symbol.toUpperCase())];
-        this.setState({chartData: data});
-      } else {
-        console.log(message);
+        const data = message.data.filter(trade => trade.s.toUpperCase() === this.state.oldSymbol.toUpperCase());
+        if(data[0]) {
+          this.setState({quote: {...this.state.quote, c: data[0].p, t: data[0].t}});
+          this.setState({chartData: [...this.state.chartData, {p: data[0].p, t: data[0].t}]});
+        }        
       }
-      this.setState({dataFromServer: message})
-      
     }
 
     ws.onclose = e => {
@@ -52,6 +52,28 @@ class App extends React.Component {
   componentDidMount = () => {
     this.connect();
     this.setState({isLoading: false});
+    const interval5Minute = setInterval(() => {
+      if(!this.state.fiveMinuteURL) {
+        return;
+      }
+      fetch(this.state.fiveMinuteURL)
+      .then(response => {
+        if(response.ok) {
+          return response.json();
+        }
+      })
+      .then(data => {
+        if(data && data['Time Series (5min)']) {
+          const intraDayData = Object.keys(data['Time Series (5min)'])
+          .map(key => {return (
+              {'p': data['Time Series (5min)'][key]['4. close'], 't': key})});
+          this.setState({intraDayData: intraDayData});
+        }  else {
+          this.setState({intraDayData: []})
+        }  
+      })
+      .catch();
+    }, 1000 * 60 * 5);
   }
 
   prevValue = '';
@@ -86,17 +108,17 @@ class App extends React.Component {
   }
 
   selectSymbol = (value) => {
-    if(this.state.symbol) {
-      this.state.ws.send(JSON.stringify({type: 'unsusbscribe', symbol: this.state.symbol}));
+    if(this.state.oldSymbol) {
+      this.state.ws.send(JSON.stringify({type: 'unsubscribe', symbol: this.state.oldSymbol}));
     }
-    this.setState({chartData: [], companyProfile: {}});
+    this.setState({chartData: [], companyProfile: {}, oldSymbol: value});
     let firstL = true;
     let secL = true;
     let thL = true;
     let frL = true;
     let fvL = false;
     this.setState({isLoading: firstL || secL || thL || frL || fvL});
-    fetch('https://finnhub.io/api/v1/stock/profile2?token=c3k6e62ad3i8d96rted0&symbol=' + value)
+    fetch('https://finnhub.io/api/v1/stock/profile2?token=c3nh42iad3iabnjj9lkg&symbol=' + value)
       .then(response => {
         firstL = false;
         this.setState({isLoading: firstL || secL || thL || frL || fvL});
@@ -106,7 +128,7 @@ class App extends React.Component {
       })
       .then(data => this.setState({companyProfile: data}))
       .catch();
-    fetch('https://finnhub.io/api/v1/quote?token=c3k6e62ad3i8d96rted0&symbol=' + value)
+    fetch('https://finnhub.io/api/v1/quote?token=c3nh42iad3iabnjj9lkg&symbol=' + value)
       .then(response => {
         secL = false;
         this.setState({isLoading: firstL || secL || thL || frL || fvL});
@@ -148,12 +170,13 @@ class App extends React.Component {
             .map(key => {return (
                 {'p': data['Time Series (5min)'][key]['4. close'], 't': key})});
             this.setState({intraDayData: intraDayData});
+            this.setState({fiveMinuteURL: 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&interval=5min&adjusted=false&apikey=SLA6RKOKBU1CLU3G&outputsize=compact&symbol=' + value});
           }  else {
             this.setState({intraDayData: []})
-          }  
+          }
         })
         .catch();
-    this.state.ws.send(JSON.stringify({type: 'susbscribe', symbol: value}));
+    this.state.ws.send(JSON.stringify({type: 'subscribe', symbol: value}));
     this.setState({symbol: value});
   }
 
@@ -173,9 +196,16 @@ class App extends React.Component {
 
   renderCharts = () => {  
     if(this.state.historicalData.length || this.state.intraDayData.length) {
-          return (<div className="quote-info quote-info-chart" style={{height: '400px'}}>
-          {this.state.historicalData.length ? <LineChart data={this.state.historicalData}><div style={{color: 'black', textAlign: 'center', fontSize: '14px'}}>Last 3 months price graph(daily close)</div></LineChart> : null}
-          {this.state.intraDayData.length ? <LineChart data={this.state.intraDayData}><div style={{color: 'black', textAlign: 'center', fontSize: '14px'}}>Last 8 hours price graph(5 min interval)</div></LineChart> : null}
+          return (<div style={{width:'100%'}}>
+          <div className="quote-info quote-info-chart" style={{height: '400px'}}>
+            {this.state.chartData.length ? <LineChart data={this.state.chartData}><div style={{color: 'black', textAlign: 'center', fontSize: '14px'}}>Live Price Graph</div></LineChart> : null}
+          </div>
+          <div className="quote-info quote-info-chart" style={{height: '400px'}}>
+            {this.state.intraDayData.length ? <LineChart data={this.state.intraDayData}><div style={{color: 'black', textAlign: 'center', fontSize: '14px'}}>Last 8 hours price graph(5 min interval)</div></LineChart> : null}
+          </div>
+          <div className="quote-info quote-info-chart" style={{height: '400px'}}>
+            {this.state.historicalData.length ? <LineChart data={this.state.historicalData}><div style={{color: 'black', textAlign: 'center', fontSize: '14px'}}>Last 3 months price graph(daily close)</div></LineChart> : null}
+          </div>
         </div>
         );
       } else if(this.state.historicalData.length === 0 && this.state.intraDayData.length === 0) {
@@ -228,8 +258,8 @@ class App extends React.Component {
                 onSelect={(val) => this.selectSymbol(val)}
               />
             </div>
-            {this.renderCharts()}
             {this.renderQuoteInfo()}
+            {this.renderCharts()}
           </header>
         </div>
       );
